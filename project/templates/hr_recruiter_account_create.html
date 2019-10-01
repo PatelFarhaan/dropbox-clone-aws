@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+
+{% if warning %}
+<div class="alert alert-warning" role="alert">
+  {{warning}}
+</div>
+{% endif %}
+
+<div class="jumbotron">
+  <h2 ALIGN="center">PELASE REGISTER YOUR STAFF ACCOUNTS FOR
+    APPLICATION TRACKING SYSTEM
+  </h2>
+  <br>
+  <br>
+  <form method="POST">
+
+    <div class="form-group">
+      <label for="exampleInputEmail1">Username</label>
+      <input type="text" class="form-control" name="username" placeholder="Enter your Username">
+      <small id="emailHelp" class="form-text text-muted"></small>
+    </div>
+
+    <div class="form-group">
+      <label for="exampleInputEmail1">Email address</label>
+      <input type="email" class="form-control" name="email" aria-describedby="emailHelp" placeholder="Enter your Email">
+      <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+    </div>
+
+    <div class="form-group">
+      <label for="exampleInputPassword1">Password</label>
+      <input type="password" class="form-control" name="password" placeholder="Password">
+    </div>
+
+    <div class="form-group">
+      <label for="exampleInputPassword1">Confirm Password</label>
+      <input type="password" class="form-control" name="repeat_password" placeholder="Repeat Password">
+    </div>
+
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </form>
+</div>
+{% endblock %}
