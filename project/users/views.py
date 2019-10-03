@@ -1,5 +1,5 @@
 from project import db
-from project.models import User, BlogPost
+from project.models import Users
 from project.users.forms import UpdateUserForm
 from project.users.picture_handler import add_profile_pic
 from flask_login import login_user, current_user, logout_user, login_required
@@ -21,20 +21,75 @@ def logout():
 def register():
 
     if request.method == 'POST':
-        name = request.form.get('name', 'None')
-        email = request.form.get('email', 'None')
-        password = request.form.get('password', 'None')
-        gender = request.form.get('gridRadios', 'None')
-        repeat_password = request.form.get('repeat_password', 'None')
-        # dob = request.form.get('date_of_birth', 'None')
-        resume = request.files.get('resume', 'not resume')
-        from werkzeug import secure_filename
-        # resp = resume.save(secure_filename(resume.filename))
-        print(resume)
-        # print(name, email, password, repeat_password, gender, dob)
+        email = request.form.get('email', None)
+        name = request.form.get('name', None)
+        password = request.form.get('password', None)
+        gender = request.form.get('gridRadios', None)
+        repeat_password = request.form.get('repeat_password', None)
+        dob = request.form.get('date_of_birth', None)
+        resume = request.files.get('resume', None)
+        resume_name = resume.filename
 
-        existing_user_email = User.query.filter_by(email=email).first()
-        # existing_user_username = User.query.filter_by(username=username).first()
+        if email is None or email == '':
+            return render_template('register.html', warning='Email cannot be Empty')
+
+        if password is None or password == '':
+            return render_template('register.html', warning='Password cannot be Empty')
+
+        if repeat_password is None or repeat_password == '':
+            return render_template('register.html', warning='Confirm Password cannot be Empty')
+
+        if name is None or name == '':
+            return render_template('register.html', warning='Name cannot be Empty')
+
+        if gender is None:
+            return render_template('register.html', warning='Gender cannot be Empty')
+
+        if dob is None or dob == '':
+            return render_template('register.html', warning='Date of Birth cannot be Empty')
+
+        if resume is None or resume.filename == '':
+            return render_template('register.html', warning='Resume cannot be Empty')
+
+        if not (password == repeat_password):
+            return render_template('register.html', warning='Both passwords should be same.')
+
+
+
+        import boto3
+
+        bucket = 'application-tracking-system-test'
+        s3 = boto3.client('s3',
+                          aws_access_key_id='ASIAXORRZPURJFTDV6NH',
+                          aws_secret_access_key='PKJW2YdtuWauC69t06R8cyoB9p1zW6vBXy0tu6ls',
+                          aws_session_token='FQoGZXIvYXdzEDoaDHCIiNOXHkcuipq8/CKCAkOCge4lCXFZIwNRkXmSXKniaZ8yDRKKDbw6LFv3k9eyaa21xolA5XA5L9U2T7ucZ+zHqGbvhM89yuDFV4RGGTCBYRtxZ7vE70pvegzVlXp7zWcR1TsnVmnSfyRuKMITOt3uq0+QG3uLOj4uQ6MWmaFRbumuwe78UFai/TTDsSQ6nv+JIY8+RYCpU3MZ+167p2qVfECNLJAhH01xc/hy/miHkbcwKoLT6AP6Rp3rbDsZvSneggh7W6lcs+72Ls/ ETgapyfsWhbKtF / lk1OPrQqhtWo6P0IKhyRabWOhaRvzpPZPrGSxVyTH1UwWylI5UpteF0upzU3afg5rhXW6l4tPa6yiL69bsBQ=='
+                          )
+
+        def upload_file_to_s3(file, bucket_name, acl="public-read"):
+
+            try:
+
+                resp = s3.upload_fileobj(
+                    file,
+                    bucket_name,
+                    file.filename,
+                    ExtraArgs={
+                        "ACL": acl,
+                        "ContentType": file.content_type
+                    }
+                )
+                print(resp)
+
+            except Exception as e:
+                # This is a catch all exception, edit this part to fit your needs.
+                print("Something Happened: ", e)
+
+        upload_file_to_s3(resume, bucket)
+
+
+
+        # existing_user_email = Users.query.filter_by(email=email).first()
+        # existing_user_username = Users.query.filter_by(username=username).first()
 
         # if existing_user_email is not None:
         #     return render_template('register.html', warning='Email already exists. Please login to continue')
@@ -98,11 +153,11 @@ def account():
     return render_template('account.html', profile_image=profile_image, form=form)
 
 
-@users_blueprint.route('/<username>')
-def user_posts(username):
-    page = request.args.get('page', 1, type=int)
-    user = User.query.filter_by(username=username).first_or_404()
-    blog_post = BlogPost.query.filter_by(author=user).order_by(BlogPost.date.desc()).paginate(page=page,per_page=5)
-    return render_template('user_blog_post.html',
-                            blog_post=blog_post,
-                            user=user)
+# @users_blueprint.route('/<username>')
+# def user_posts(username):
+#     page = request.args.get('page', 1, type=int)
+#     user = Users.query.filter_by(username=username).first_or_404()
+    # blog_post = BlogPost.query.filter_by(author=user).order_by(BlogPost.date.desc()).paginate(page=page,per_page=5)
+    # return render_template('user_blog_post.html',
+    #                         blog_post=blog_post,
+    #                         user=user)
