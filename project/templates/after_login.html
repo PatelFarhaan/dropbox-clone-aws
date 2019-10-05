@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+
+{% if warning %}
+<div class="alert alert-warning" role="alert" align="center">
+  {{warning}}
+</div>
+{% endif %}
+  
+  {% if user_name %}
+  <h1>Welcome {{ user_name }}!!!</h1>
+  {% endif %}
+
+<div class="jumbotron">
+  <br>
+  <form method="POST" enctype="multipart/form-data">
+
+    <div class="form-group">
+      <label class="control-label">Upload a File</label>
+      <div class="custom-file">
+        <input type="file" class="custom-file-input" name="file_obj" aria-describedby="inputGroupFileAddon01">
+        <label class="custom-file-label" for="inputGroupFile01">Choose file</label>
+      </div>
+    </div>
+
+    <br>
+    <script>
+      // Add the following code if you want the name of the file appear on select
+      $(".custom-file-input").on("change", function () {
+        var fileName = $(this).val().split("\\").pop();
+        $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+      });
+    </script>
+
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </form>
+</div>
+{% endblock %}

@@ -9,8 +9,8 @@
   
 
 <div class="jumbotron">
-  <h2 ALIGN="center">PELASE REGISTER FOR
-    APPLICATION TRACKING SYSTEM
+  <h2 ALIGN="center">WELCOME TO
+    PUTBOX!!! YOUR NEW PLACE FOR STORAGE.
   </h2>
   <br>
   <br>
@@ -37,79 +37,6 @@
       <input type="text" class="form-control" name="name" placeholder="Enter your Name">
       <small id="emailHelp" class="form-text text-muted"></small>
     </div>
-
-    <fieldset class="form-group">
-      <div class="row">
-        <legend class="col-form-label col-sm-2 pt-0">Gender</legend>
-        <div class="col-sm-10">
-          <div class="form-check">
-            <input class="form-check-input" type="radio" name="gridRadios" id="gridRadios1" value="male">
-            <label class="form-check-label" for="gridRadios1">
-              Male
-            </label>
-          </div>
-          <div class="form-check">
-            <input class="form-check-input" type="radio" name="gridRadios" id="gridRadios2" value="female">
-            <label class="form-check-label" for="gridRadios2">
-              Female
-            </label>
-          </div>
-        </div>
-      </div>
-    </fieldset>
-
-    <!--  jQuery -->
-    <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
-    <!-- Isolated Version of Bootstrap, not needed if your site already uses Bootstrap -->
-    <link rel="stylesheet" href="https://formden.com/static/cdn/bootstrap-iso.css" />
-    <!-- Bootstrap Date-Picker Plugin -->
-    <script type="text/javascript"
-      src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/js/bootstrap-datepicker.min.js"></script>
-    <link rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.4.1/css/bootstrap-datepicker3.css" />
-
-    <!-- Form code begins -->
-    <div class="form-group">
-      <!-- Date input -->
-      <label class="control-label" for="date">Date of Birth</label>
-      <input class="form-control" id="date" name="date_of_birth" placeholder="MM/DD/YYY" type="text" />
-    </div>
-    <!-- Form code ends -->
-
-    <script>
-      $(document).ready(function () {
-        var date_input = $('input[name="date_of_birth"]'); //our date input has the name "date"
-        var container = $('.bootstrap-iso form').length > 0 ? $('.bootstrap-iso form').parent() : "body";
-        var options = {
-          format: 'mm/dd/yyyy',
-          container: container,
-          todayHighlight: true,
-          autoclose: true,
-        };
-        date_input.datepicker(options);
-      })
-    </script>
-
-
-    <div class="form-group">
-      <label class="control-label">Resume</label>
-      <div class="custom-file">
-        <input type="file" class="custom-file-input" name="resume" aria-describedby="inputGroupFileAddon01">
-        <label class="custom-file-label" for="inputGroupFile01">Choose file</label>
-      </div>
-    </div>
-
-    <br>
-    <script>
-      // Add the following code if you want the name of the file appear on select
-      $(".custom-file-input").on("change", function () {
-        var fileName = $(this).val().split("\\").pop();
-        $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
-      });
-    </script>
-
-
-
 
     <button type="submit" class="btn btn-primary">Submit</button>
   </form>
