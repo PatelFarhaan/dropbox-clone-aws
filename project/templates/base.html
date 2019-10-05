@@ -40,9 +40,6 @@
     <li class="nav-link">
       <a href="{{ url_for('users.account') }}">Account</a>
     </li>
-    <li class="nav-link">
-      <a href="{{ url_for('blogpost.create_post') }}">Create Post</a>
-    </li>
     {% else %}
     <li class="nav-link">
       <a href="{{ url_for('users.register') }}">Register</a>
@@ -51,7 +48,7 @@
   </ul>
   <div class="container">
     <div class="jumbotron">
-      <h1 align="center">APPLICATION TRACKING SYSTEM</h1>
+      <h1 align="center">PUTBOX</h1>
     </div>
     {% block content %}
 

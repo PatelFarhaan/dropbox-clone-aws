@@ -8,7 +8,7 @@ from sqlalchemy_utils import create_database, database_exists
 ##########################DATABASE##################################
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'supersecretkey'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:***REMOVED_PASSWORD***@localhost/tracking_system'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:***REMOVED_PASSWORD***@localhost/putbox'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 db = SQLAlchemy(app)
