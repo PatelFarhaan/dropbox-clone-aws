@@ -5,9 +5,8 @@ import boto3
 from project import db
 from project.users.models import Users, Storage
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import login_user, current_user, logout_user, login_required
-from flask import render_template, url_for, flash, redirect, request, Blueprint, session
-
+from flask_login import login_user, logout_user, login_required, current_user
+from flask import render_template, url_for, redirect, request, Blueprint, session
 
 users_blueprint = Blueprint('users', __name__, template_folder='templates')
 
@@ -16,7 +15,6 @@ users_blueprint = Blueprint('users', __name__, template_folder='templates')
 @login_required
 def logout():
     logout_user()
-    flash('Logged Out')
     return redirect(url_for('users.login'))
 
 
@@ -58,9 +56,9 @@ def register():
 
         else:
             new_user = Users(email=email,
-                            name=name,
-                            mobile_number=mobile_number,
-                            hashed_password=generate_password_hash(password))
+                             name=name,
+                             mobile_number=mobile_number,
+                             hashed_password=generate_password_hash(password))
 
             db.session.add(new_user)
             db.session.commit()
@@ -76,7 +74,7 @@ def login():
     if request.method == 'POST':
         email = request.form.get('email', 'None')
         password = request.form.get('password', 'None')
-        
+
         if email == None:
             return render_template('login.html', warning='Email cannot be Empty')
 
@@ -90,7 +88,7 @@ def login():
 
         elif check_password_hash(user.hashed_password, password):
             login_user(user)
-            session.clear()
+            print("kjbsd")
             session['email'] = user.email
             return redirect(url_for('users.after_login'))
         else:
@@ -101,7 +99,6 @@ def login():
 @users_blueprint.route('/after-login', methods=['GET', 'POST'])
 @login_required
 def after_login():
-    import ipdb; ipdb.set_trace()
     user = Users.query.filter_by(email=session['email']).first()
     error_flag = False
     try:
@@ -115,24 +112,38 @@ def after_login():
         user_storage_files = Storage.query.filter_by(user_id=user.id).paginate(page=page, per_page=5)
 
 
-        filename = request.form.get('delete_filename', None)
-        if filename:
+        if request.form['update_filename']:
+            filename = request.form.get('update_filename', None)
+            print("hasdhas khabsd liasdk iuahd oa",filename)
+        # filename = request.form.get('delete_filename', None)
+        elif request.form['delete_filename']:
+            filename = request.form.get('delete_filename', None)
+        # if filename:
             try:
                 bucket = 'putbox-darshan'
                 s3 = boto3.resource('s3',
-                    aws_access_key_id='***REMOVED_AWS_ACCESS_KEY***',
-                    aws_secret_access_key='***REMOVED_AWS_SECRET_KEY***')
+                                    aws_access_key_id='***REMOVED_AWS_ACCESS_KEY***',
+                                    aws_secret_access_key='***REMOVED_AWS_SECRET_KEY***')
                 file_obj = s3.Object(bucket, filename)
-                resp = file_obj.delete()
+                file_obj.delete()
                 storage_obj_delete = Storage.query.filter_by(filename=filename).first()
                 db.session.delete(storage_obj_delete)
                 db.session.commit()
                 return redirect(url_for('users.after_login'))
             except:
                 return redirect(url_for('users.after_login'))
+
+
+
+
+
+
+
+
         else:
             file_obj = request.files.get('file_obj', None)
             filename = file_obj.filename.replace(' ', '')
+            filename = f"{current_user.id}/{filename}"
             storage_files = Storage.query.all()
             files_list = []
 
@@ -171,7 +182,7 @@ def file_upload_to_s3(file, object_name):
         's3',
         aws_access_key_id='***REMOVED_AWS_ACCESS_KEY***',
         aws_secret_access_key='***REMOVED_AWS_SECRET_KEY***'
-        )
+    )
     s3.upload_fileobj(file, bucket, object_name, ExtraArgs={"ACL": "public-read"})
     public_url = f"https://putbox-darshan.s3-us-west-1.amazonaws.com/{object_name}"
     return public_url
@@ -183,10 +194,10 @@ def simple_notification_service(name, number):
         region_name='us-east-1',
         aws_access_key_id='***REMOVED_AWS_ACCESS_KEY***',
         aws_secret_access_key='***REMOVED_AWS_SECRET_KEY***'
-        )
+    )
     resp = sns.publish(
-            PhoneNumber=f"+1{str(number)}",
-            Message = f"""
+        PhoneNumber=f"+1{str(number)}",
+        Message = f"""
                     Dear {name}.
                     Your account has been successfully created on PUTBOX, A NEW WAY FOR ALL YOUR STORAGE!!!
                     """)
