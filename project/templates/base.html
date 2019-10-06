@@ -19,7 +19,18 @@
 
 <body>
   <ul class="nav">
+
+    {% if current_user.is_authenticated %}
     <li class="nav-link">
+      <a href="{{ url_for('users.after_login') }}">Home</a>
+    </li>
+     
+    <li class="nav-link">
+      <a href="{{ url_for('users.logout') }}">Log Out</a>
+    </li>
+
+    {% else %}
+     <li class="nav-link">
       <a href="{{ url_for('core.home') }}">Home</a>
     </li>
     <li class="nav-link">
@@ -28,19 +39,6 @@
     <li class="nav-link">
       <a href="{{ url_for('admin.admin_login') }}">Admin</a>
     </li>
-    <li class="nav-link">
-        <a href="{{ url_for('admin.create_rc_hr_accounts') }}">Create Staff Accounts</a>
-      </li>
-
-
-    {% if current_user.is_authenticated %}
-    <li class="nav-link">
-      <a href="{{ url_for('users.logout') }}">Log Out</a>
-    </li>
-    <li class="nav-link">
-      <a href="{{ url_for('users.account') }}">Account</a>
-    </li>
-    {% else %}
     <li class="nav-link">
       <a href="{{ url_for('users.register') }}">Register</a>
     </li>
