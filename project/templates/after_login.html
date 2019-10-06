@@ -11,8 +11,52 @@
   <h1>Welcome {{ user_name }}!!!</h1>
   {% endif %}
 
-<div class="jumbotron">
   <br>
+  <br>
+
+{% if user_storage_files %}
+<table class="table table-dark table-striped table-hover">
+  <thead>
+    <tr>
+      <th style="text-align:center" scope="col">File Name</th>
+      <th style="text-align:center" scope="col">Download Link</th>
+      <th style="text-align:center" scope="col">Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for app in user_storage_files.items %}
+    <tr>
+ <td style="text-align:center">{{ app.filename }}</td>
+    <td style="text-align:center"><a href="app.file" download="">{{ app.file }}</a></td>
+
+    <td>
+      <form  method="POST">
+        <input type="hidden" name="delete_filename" value="{{ app.filename }}">
+      <input type="submit" onclick="return confirm('Are you sure you want to delete this file?')" value="Delete">
+      </form>
+    </td>
+    </tr>
+    {% endfor %}
+
+  </tbody>
+</table>
+
+ <nav aria-label="Page navigation example">
+     <ul class="pagination justify-content-center">
+       {% for page_num in user_storage_files.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+          {% if user_storage_files.page == page_num %}
+          <li class="page-item disabled">
+            <a class="page-link" href="{{ url_for('users.after_login', page=page_num) }}">{{ page_num }}</a></li>
+          {% else %}
+            <li class="page-item"><a class="page-link" href="{{ url_for('users.after_login', page=page_num) }}">{{ page_num }}</a></li>
+          {% endif %}
+      {% endfor %}
+    </nav>
+
+{% endif %}
+
+
+<div class="jumbotron">
   <form method="POST" enctype="multipart/form-data">
 
     <div class="form-group">
@@ -23,7 +67,6 @@
       </div>
     </div>
 
-    <br>
     <script>
       // Add the following code if you want the name of the file appear on select
       $(".custom-file-input").on("change", function () {
