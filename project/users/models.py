@@ -7,8 +7,8 @@ from project import db, login_manager
 ###############################################* LOGIN MANAGER *########################################################
 ########################################################################################################################
 @login_manager.user_loader
-def user_load(id):
-    return Users.query.get(id)
+def load_user(user_id):
+    return Users.query.get(int(user_id))
 ########################################################################################################################
 
 
@@ -21,11 +21,12 @@ class Users(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, nullable=False)
     name = db.Column(db.String(64))
     hashed_password = db.Column(db.String(256))
+    is_admin = db.Column(db.Boolean, default=False)
     mobile_number = db.Column(db.String(12), nullable=False)
-    email = db.Column(db.String(128), unique=True, index=True)
+    email = db.Column(db.String(128), unique=True, index=True, nullable=False)
     register_date = db.Column(db.DateTime, default=datetime.datetime.utcnow())
 
-    storage = db.relationship('Storage', backref='users', lazy=True)
+    storage = db.relationship('Storage', backref='user', lazy=True)
 ########################################################################################################################
 
 
