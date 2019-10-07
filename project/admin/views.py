@@ -5,18 +5,18 @@ sys.path.append('../../')
 
 import boto3
 from project import db
-from project.admin.models import Admin
 from project.users.models import Users, Storage
 from werkzeug.security import check_password_hash
 from flask_login import login_user, logout_user, login_required
-from flask import render_template, request, Blueprint, redirect, url_for
+from flask import render_template, request, Blueprint, redirect, url_for, session
 
 
 admin_blueprint = Blueprint('admin', __name__, template_folder='templates')
 
 
 @admin_blueprint.route('/admin', methods=['GET', 'POST'])
-def admin_login():
+def login():
+    session.clear()
     if request.method == 'POST':
         admin_email = request.form.get('admin_email', None)
         admin_password = request.form.get('admin_password', None)
@@ -27,14 +27,13 @@ def admin_login():
         if admin_password == None:
             return render_template('admin.html', warning='Admin Password cannot be Empty')
 
-        admin = Admin.query.filter_by(admin_email=admin_email).first()
+        admin = Users.query.filter_by(email=admin_email).first()
         if admin == None:
             return render_template('admin.html', warning='Admin does not Exist.')
 
-        elif check_password_hash(admin.admin_hashed_password, admin_password):
+        elif check_password_hash(admin.hashed_password, admin_password) and admin.is_admin:
             login_user(admin)
             return redirect(url_for('admin.admin_page'))
-
     return render_template ('admin.html')
 
 
@@ -76,8 +75,9 @@ def admin_page():
     return render_template ('admin_page.html', info=final_result)
 
 
-@admin_blueprint.route('/logout', methods=['GET'])
+@admin_blueprint.route('/admin-logout', methods=['GET'])
 @login_required
 def logout():
     logout_user()
+    session.clear()
     return redirect(url_for('users.login'))

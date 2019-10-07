@@ -15,12 +15,13 @@ users_blueprint = Blueprint('users', __name__, template_folder='templates')
 @login_required
 def logout():
     logout_user()
+    session.clear()
     return redirect(url_for('users.login'))
 
 
 @users_blueprint.route('/register', methods=['GET','POST'])
 def register():
-
+    session.clear()
     if request.method == 'POST':
         email = request.form.get('email', None)
         name = request.form.get('name', None)
@@ -55,11 +56,7 @@ def register():
             return render_template('register.html', warning='Email already exists. Please login to continue')
 
         else:
-            new_user = Users(email=email,
-                             name=name,
-                             mobile_number=mobile_number,
-                             hashed_password=generate_password_hash(password))
-
+            new_user = Users(email=email, name=name, mobile_number=mobile_number, hashed_password=generate_password_hash(password))
             db.session.add(new_user)
             db.session.commit()
             simple_notification_service(name, mobile_number)
@@ -88,7 +85,6 @@ def login():
 
         elif check_password_hash(user.hashed_password, password):
             login_user(user)
-            print("kjbsd")
             session['email'] = user.email
             return redirect(url_for('users.after_login'))
         else:
@@ -103,22 +99,17 @@ def after_login():
     error_flag = False
     try:
         page = request.args.get('page', 1, type=int)
-        user_storage_files = Storage.query.filter_by(user_id=user.id).paginate(page=page, per_page=5)
+        user_storage_files = Storage.query.filter_by(id=user.id).paginate(page=page, per_page=5)
     except:
         error_flag = True
 
     if request.method == 'POST':
         page = request.args.get('page', 1, type=int)
-        user_storage_files = Storage.query.filter_by(user_id=user.id).paginate(page=page, per_page=5)
+        user_storage_files = Storage.query.filter_by(id=user.id).paginate(page=page, per_page=5)
 
 
-        if request.form['update_filename']:
-            filename = request.form.get('update_filename', None)
-            print("hasdhas khabsd liasdk iuahd oa",filename)
-        # filename = request.form.get('delete_filename', None)
-        elif request.form['delete_filename']:
-            filename = request.form.get('delete_filename', None)
-        # if filename:
+        filename = request.form.get('delete_filename', None)
+        if filename:
             try:
                 bucket = 'putbox-darshan'
                 s3 = boto3.resource('s3',
@@ -132,18 +123,10 @@ def after_login():
                 return redirect(url_for('users.after_login'))
             except:
                 return redirect(url_for('users.after_login'))
-
-
-
-
-
-
-
-
         else:
             file_obj = request.files.get('file_obj', None)
             filename = file_obj.filename.replace(' ', '')
-            filename = f"{current_user.id}/{filename}"
+            filename = f"{current_user.id}-{filename}"
             storage_files = Storage.query.all()
             files_list = []
 
@@ -162,7 +145,7 @@ def after_login():
             public_url = file_upload_to_s3(file_obj, filename)
             storage_obj = Storage(
                 file=public_url,
-                user_id=user.id,
+                id=user.id,
                 filename=filename)
             db.session.add(storage_obj)
             db.session.commit()
