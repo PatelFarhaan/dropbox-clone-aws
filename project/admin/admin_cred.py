@@ -8,9 +8,9 @@ from werkzeug.security import generate_password_hash
 
 
 
-admin_obj = Users(email='patel.farhaan@gmail.com',
-                  hashed_password=generate_password_hash('***REMOVED_PASSWORD***'),
-                  mobile_number='9962048121',
+admin_obj = Users(email='***REMOVED_EMAIL***',
+                  hashed_password=generate_password_hash('Darshan'),
+                  mobile_number='6692927356',
                   is_admin=True
                   )
 db.session.add(admin_obj)

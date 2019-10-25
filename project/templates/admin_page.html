@@ -32,7 +32,7 @@
     <td style="text-align:center">{{ app.username }}</td>
     <td style="text-align:center">{{ app.email }}</td>
     <td style="text-align:center">{{ app.filename }}</td>
-    <td style="text-align:center"><a href="app.file" download="">{{ app.file_link }}</a></td>
+    <td style="text-align:center"><a href="{{app.file}}" download="">{{ app.file_link }}</a></td>
     <td>
       <form  method="POST">
         <input type="hidden" name="delete_filename" value="{{ app.filename }}">
