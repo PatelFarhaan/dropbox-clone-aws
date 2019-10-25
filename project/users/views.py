@@ -1,8 +1,10 @@
 import sys
 sys.path.append('../../')
 
+import os
 import boto3
-from project import db
+import shutil
+from project import db, app
 from project.users.models import Users, Storage
 from project.users.lambda_sns import lambda_message_sns
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -108,6 +110,18 @@ def after_login():
     if request.method == 'POST':
         file_obj = request.files.get('file_obj', None)
         if file_obj:
+            file_path = os.getcwd() + '/tmp/'
+            if not os.path.exists(file_path):
+                os.mkdir(file_path)
+
+            file_obj.save(os.path.join(app.config['UPLOAD_FOLDER'], file_obj.filename))
+            file_obj_path = file_path + f'{file_obj.filename}'
+            resp = max_file_size(file_obj_path)
+            shutil.rmtree(file_path)
+            if not resp:
+                return render_template('after_login.html', user_name=user.name, user_storage_files=user_storage_files,
+                                       warning='Please upload a file less than 10 MB in size!')
+            file_desc = request.form.get("file_desc",None)
             filename = file_obj.filename.replace(' ', '')
             filename = f"{current_user.id}-{filename}"
             storage_files = Storage.query.all()
@@ -130,7 +144,8 @@ def after_login():
             storage_obj = Storage(
                 file=public_url,
                 user_id=user.id,
-                filename=filename)
+                filename=filename,
+                file_desc=file_desc)
             db.session.add(storage_obj)
             db.session.commit()
             page = request.args.get('page', 1, type=int)
@@ -171,3 +186,12 @@ def file_upload_to_s3(file, object_name):
     s3.upload_fileobj(file, bucket, object_name, ExtraArgs={"ACL": "public-read"})
     public_url = f"https://putbox-darshan.s3-us-west-1.amazonaws.com/{object_name}"
     return public_url
+
+
+def max_file_size(file_path):
+    if os.path.isfile(file_path):
+        file_info = os.stat(file_path)
+        if file_info.st_size > 10000000:
+            return False
+        else:
+            return True

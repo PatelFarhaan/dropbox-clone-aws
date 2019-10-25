@@ -40,4 +40,6 @@ class Storage(db.Model):
     file = db.Column(db.String(1000))
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     filename = db.Column(db.String(1000), nullable=False, unique=True)
+    uploaded_on = db.Column(db.DateTime, default=datetime.datetime.utcnow(), nullable=False)
+    file_desc = db.Column(db.String(1000))
 ########################################################################################################################
