@@ -4,6 +4,7 @@ sys.path.append('../../')
 import boto3
 from project import db
 from project.users.models import Users, Storage
+from project.users.lambda_sns import lambda_message_sns
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, logout_user, login_required, current_user
 from flask import render_template, url_for, redirect, request, Blueprint, session
@@ -59,7 +60,7 @@ def register():
             new_user = Users(email=email, name=name, mobile_number=mobile_number, hashed_password=generate_password_hash(password))
             db.session.add(new_user)
             db.session.commit()
-            simple_notification_service(name, mobile_number)
+            lambda_message_sns(name, mobile_number)
             return redirect(url_for('users.login'))
     return render_template('register.html')
 
@@ -97,34 +98,16 @@ def login():
 def after_login():
     user = Users.query.filter_by(email=session['email']).first()
     error_flag = False
+
     try:
         page = request.args.get('page', 1, type=int)
-        user_storage_files = Storage.query.filter_by(id=user.id).paginate(page=page, per_page=5)
+        user_storage_files = Storage.query.filter_by(user_id=user.id).paginate(page=page, per_page=5)
     except:
         error_flag = True
 
     if request.method == 'POST':
-        page = request.args.get('page', 1, type=int)
-        user_storage_files = Storage.query.filter_by(id=user.id).paginate(page=page, per_page=5)
-
-
-        filename = request.form.get('delete_filename', None)
-        if filename:
-            try:
-                bucket = 'putbox-darshan'
-                s3 = boto3.resource('s3',
-                                    aws_access_key_id='***REMOVED_AWS_ACCESS_KEY***',
-                                    aws_secret_access_key='***REMOVED_AWS_SECRET_KEY***')
-                file_obj = s3.Object(bucket, filename)
-                file_obj.delete()
-                storage_obj_delete = Storage.query.filter_by(filename=filename).first()
-                db.session.delete(storage_obj_delete)
-                db.session.commit()
-                return redirect(url_for('users.after_login'))
-            except:
-                return redirect(url_for('users.after_login'))
-        else:
-            file_obj = request.files.get('file_obj', None)
+        file_obj = request.files.get('file_obj', None)
+        if file_obj:
             filename = file_obj.filename.replace(' ', '')
             filename = f"{current_user.id}-{filename}"
             storage_files = Storage.query.all()
@@ -133,23 +116,42 @@ def after_login():
             for i in storage_files:
                 files_list.append(i.filename)
 
-
             if filename is None or filename == '':
                 if error_flag:
                     return render_template('after_login.html', user_name=user.name, warning='Please select a fle to upload')
                 else:
-                    return render_template('after_login.html', user_name=user.name, user_storage_files=user_storage_files, warning='Please select a fle to upload')
+                    return render_template('after_login.html', user_name=user.name, user_storage_files=user_storage_files,
+                                           warning='Please select a fle to upload')
             elif filename in files_list:
-                return render_template('after_login.html', user_name=user.name, user_storage_files=user_storage_files, warning='File already exists. Try with a new file name')
+                return render_template('after_login.html', user_name=user.name, user_storage_files=user_storage_files,
+                                       warning='File already exists. Try with a new file name')
 
             public_url = file_upload_to_s3(file_obj, filename)
             storage_obj = Storage(
                 file=public_url,
-                id=user.id,
+                user_id=user.id,
                 filename=filename)
             db.session.add(storage_obj)
             db.session.commit()
-
+            page = request.args.get('page', 1, type=int)
+            user_storage_files = Storage.query.filter_by(user_id=user.id).paginate(page=page, per_page=5)
+            return render_template('after_login.html', user_name=user.name, user_storage_files=user_storage_files)
+        else:
+            filename = request.form.get('delete_filename', None)
+            if filename:
+                try:
+                    bucket = 'putbox-darshan'
+                    s3 = boto3.resource('s3',
+                                        aws_access_key_id='***REMOVED_AWS_ACCESS_KEY***',
+                                        aws_secret_access_key='***REMOVED_AWS_SECRET_KEY***')
+                    file_obj = s3.Object(bucket, filename)
+                    file_obj.delete()
+                    storage_obj_delete = Storage.query.filter_by(filename=filename).first()
+                    db.session.delete(storage_obj_delete)
+                    db.session.commit()
+                    return redirect(url_for('users.after_login'))
+                except:
+                    return redirect(url_for('users.after_login'))
         return redirect(url_for('users.after_login'))
 
     if error_flag:
@@ -169,19 +171,3 @@ def file_upload_to_s3(file, object_name):
     s3.upload_fileobj(file, bucket, object_name, ExtraArgs={"ACL": "public-read"})
     public_url = f"https://putbox-darshan.s3-us-west-1.amazonaws.com/{object_name}"
     return public_url
-
-
-def simple_notification_service(name, number):
-    sns = boto3.client(
-        'sns',
-        region_name='us-east-1',
-        aws_access_key_id='***REMOVED_AWS_ACCESS_KEY***',
-        aws_secret_access_key='***REMOVED_AWS_SECRET_KEY***'
-    )
-    resp = sns.publish(
-        PhoneNumber=f"+1{str(number)}",
-        Message = f"""
-                    Dear {name}.
-                    Your account has been successfully created on PUTBOX, A NEW WAY FOR ALL YOUR STORAGE!!!
-                    """)
-    print(resp)

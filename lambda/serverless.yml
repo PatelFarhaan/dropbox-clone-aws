@@ -1,0 +1,32 @@
+service: lambda
+
+package:
+    individually: true
+
+provider:
+  name: aws
+  timeout: 120
+  runtime: python3.7
+  stage: ${opt:stage}
+  region: us-west-1
+  stackName: putbox-stack
+
+custom:
+  pkgPyFuncs:
+    buildDir: _build
+    cleanup: true
+
+plugins:
+  - serverless-python-requirements
+
+functions:
+  AfterjsonEvents:
+    name: after_json_events_v1_serverless_${opt:stage}
+    handler: lambda_function.lambda_handler
+    module: project_files/after_json_events
+    timeout: 30
+    events:
+      - http:
+          path: v1/darshan/putbox/sns
+          method: post
+    requirements: requirements.txt

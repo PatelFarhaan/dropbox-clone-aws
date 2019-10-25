@@ -1,8 +1,6 @@
 import sys
 sys.path.append('../../')
 
-
-
 import boto3
 from project import db
 from project.users.models import Users, Storage
