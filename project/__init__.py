@@ -1,3 +1,4 @@
+import os
 from flask import Flask
 from flask_migrate import Migrate
 from flask_login import LoginManager
@@ -6,11 +7,17 @@ from sqlalchemy_utils import create_database, database_exists
 
 
 ##########################DATABASE##################################
+file_path = os.getcwd() + '/tmp/'
+if not os.path.exists(file_path):
+    os.mkdir(file_path)
+
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'supersecretkey'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:***REMOVED_PASSWORD***@localhost/putbox'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+app.config['UPLOAD_FOLDER'] = file_path
 db = SQLAlchemy(app)
 Migrate(app, db)
 
