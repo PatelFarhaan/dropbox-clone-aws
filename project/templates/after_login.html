@@ -7,6 +7,12 @@
 </div>
 {% endif %}
 
+{% if warning %}
+<div class="alert alert-warning" role="alert" align="center">
+  {{success}}
+</div>
+{% endif %}
+
 {% if user_name %}
 <h1>Welcome {{ user_name }}!!!</h1>
 {% endif %}
@@ -20,15 +26,21 @@
     <tr>
       <th style="text-align:center" scope="col">File Name</th>
       <th style="text-align:center" scope="col">Download Link</th>
+      <th style="text-align:center" scope="col">Description</th>
       <th style="text-align:center" scope="col">Action</th>
       <th style="text-align:center" scope="col">Update</th>
+      <th style="text-align:center" scope="col">Uploaded On</th>
+      <th style="text-align:center" scope="col">Updated On</th>
     </tr>
   </thead>
   <tbody>
     {% for app in user_storage_files.items %}
     <tr>
       <td style="text-align:center">{{ app.filename }}</td>
-      <td style="text-align:center"><a href="{{app.file}}" download="">{{ "https://putbox.com/"+current_user.name+"/"+app.file[50:] }}</a></td>
+      <td style="text-align:center"><a href="{{app.file}}"
+          download="">{{ "https://putbox.com/"+current_user.name+"/"+app.file[50:] }}</a></td>
+
+      <td style="text-align:center">{{ app.file_desc }}</td>
 
       <td>
         <form method="POST">
@@ -39,38 +51,85 @@
       </td>
 
       <td>
-        <form method="POST">
-          <input style="text-align:center" type="hidden" name="update_filename" value="{{ app.filename }}">
-          <input style="text-align:center" type="submit"
-          data-toggle="modal" data-target="#exampleModal" value="Update">
-        </form>
+        <input style="text-align:center" type="button" data-toggle="modal" data-target="#myModal" value="Update">
+
+        <!-- The Modal -->
+        <div class="modal" id="myModal">
+          <div class="modal-dialog">
+            <div class="modal-content">
+
+              <!-- Modal Header -->
+              <div class="modal-header">
+                <h4 class="modal-title">
+                  <font color="blue">Update File</font>
+                </h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+              </div>
+
+              <form method="POST" enctype="multipart/form-data">
+
+                <div class="form-group">
+                  <div class="custom-file">
+                    <input type="hidden" name="orginal_filename" value="{{app.file}}">
+                    <input type="file" class="custom-file-input" name="update_filename"
+                      aria-describedby="inputGroupFileAddon01">
+                    <label class="custom-file-label" for="inputGroupFile01">Choose file</label>
+                  </div>
+                </div>
+
+                <script>
+                  // Add the following code if you want the name of the file appear on select
+                  $(".custom-file-input").on("change", function () {
+                    var fileName = $(this).val().split("\\").pop();
+                    $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+                  });
+                </script>
+
+                <!-- Modal footer -->
+                <div class="modal-footer">
+                  <button type="submit" name="btn" value="update_form_input" class="btn btn-primary">Submit</button>
+                  <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                </div>
+
+              </form>
+
+            </div>
+          </div>
+        </div>
       </td>
+
+      <td style="text-align:center">{{ app.uploaded_on }}</td>
+
+      <td style="text-align:center">{{ app.updated_on }}</td>
+
+
     </tr>
-    
+
     {% endfor %}
 
   </tbody>
 </table>
 
-<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          ...
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary">Save changes</button>
-        </div>
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
       </div>
     </div>
   </div>
+</div>
 
 <!-- Modal -->
 

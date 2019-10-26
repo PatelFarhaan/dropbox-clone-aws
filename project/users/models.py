@@ -38,8 +38,10 @@ class Storage(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, nullable=False)
     file = db.Column(db.String(1000))
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    updated_on = db.Column(db.DateTime, nullable=True)
     filename = db.Column(db.String(1000), nullable=False, unique=True)
+    file_desc = db.Column(db.String(1000), default='No description provided')
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     uploaded_on = db.Column(db.DateTime, default=datetime.datetime.utcnow(), nullable=False)
-    file_desc = db.Column(db.String(1000))
+
 ########################################################################################################################

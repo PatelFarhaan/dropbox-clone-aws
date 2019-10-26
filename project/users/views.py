@@ -4,6 +4,7 @@ sys.path.append('../../')
 import os
 import boto3
 import shutil
+import datetime
 from project import db, app
 from project.users.models import Users, Storage
 from project.users.lambda_sns import lambda_message_sns
@@ -106,6 +107,28 @@ def after_login():
         user_storage_files = Storage.query.filter_by(user_id=user.id).paginate(page=page, per_page=5)
     except:
         error_flag = True
+
+    update_obj = request.form.get('btn', None)
+    if update_obj == 'update_form_input':
+        file_obj = request.files.get('update_filename', None)
+        original_obj = request.form.get('orginal_filename', None)
+
+        if file_obj:
+            convert_name = f'https://putbox-darshan.s3-us-west-1.amazonaws.com/{user.id}-'+file_obj.filename
+
+            if original_obj == convert_name:
+                file_upload_to_s3(file_obj, file_obj.filename)
+                temp_filename_single = f'{user.id}-{file_obj.filename}'
+                update_query_obj = Storage.query.filter_by(user_id=user.id, filename=temp_filename_single).first()
+                update_query_obj.updated_on = datetime.datetime.utcnow()
+                db.session.commit()
+                return render_template('after_login.html', user_name=user.name, user_storage_files=user_storage_files,
+                                       success='File Updated Successfully!!!')
+            else:
+                return render_template('after_login.html', user_name=user.name, user_storage_files=user_storage_files,
+                                       warning='File does not exist. You can only update a existing file!!!')
+        else:
+            return redirect(url_for('users.after_login'))
 
     if request.method == 'POST':
         file_obj = request.files.get('file_obj', None)
