@@ -6,7 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy_utils import create_database, database_exists
 
 
-###########################DATABASE##################################
+##########################DATABASE##################################
 file_path = os.getcwd() + '/tmp/'
 if not os.path.exists(file_path):
     os.mkdir(file_path)
